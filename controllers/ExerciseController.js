@@ -38,13 +38,13 @@ const updateExercise = asyncHandler(async (req, res) => {
   }
 
   // Check for user
-  if (!reg.user) {
+  if (!req.user) {
     res.status(401);
     throw new Error("User not found");
   }
 
   // Make sure the logged in user matches the exercise user
-  if (exercise.user.toString() !== reg.user.id) {
+  if (exercise.user.toString() !== req.user.id) {
     res.status(401);
     throw new Error("User not authorized");
   }
@@ -69,13 +69,13 @@ const deleteExercise = asyncHandler(async (req, res) => {
   }
 
   // Check for user
-  if (!reg.user) {
+  if (!req.user) {
     res.status(401);
     throw new Error("User not found");
   }
 
   // Make sure the logged in user matches the exercise user
-  if (exercise.user.toString() !== reg.user.id) {
+  if (exercise.user.toString() !== req.user.id) {
     res.status(401);
     throw new Error("User not authorized");
   }
