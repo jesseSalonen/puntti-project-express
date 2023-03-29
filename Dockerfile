@@ -1,4 +1,4 @@
-FROM node:17-alpine
+FROM arm64v8/node:18-alpine
 
 ENV NODE_ENV production
 
