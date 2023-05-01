@@ -2,6 +2,8 @@ const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
+const { StatusCodes } = require("http-status-codes");
+const logger = require("../logger");
 
 // @desc  Register new user
 // @route POST /api/users
@@ -10,7 +12,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
-    res.status(400);
+    res.status(StatusCodes.BAD_REQUEST);
     throw new Error("Please add all fields");
   }
 
@@ -18,7 +20,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const userExists = await User.findOne({ email });
 
   if (userExists) {
-    res.status(400);
+    res.status(StatusCodes.BAD_REQUEST);
     throw new Error("User already exists");
   }
 
@@ -34,14 +36,14 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (user) {
-    res.status(201).json({
+    res.status(StatusCodes.CREATED).json({
       _id: user.id,
       name: user.name,
       email: user.email,
       token: generateToken(user._id),
     });
   } else {
-    res.status(400);
+    res.status(StatusCodes.BAD_REQUEST);
     throw new Error("Invalid  user data");
   }
 });

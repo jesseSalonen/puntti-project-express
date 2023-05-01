@@ -1,13 +1,21 @@
 const asyncHandler = require("express-async-handler");
 const Exercise = require("../models/exerciseModel");
 const User = require("../models/userModel");
+const logger = require("../logger");
+const { StatusCodes } = require("http-status-codes");
 
 // @desc  Get exercises
 // @route GET /api/exercises
 // @access Private
 const getExercises = asyncHandler(async (req, res) => {
-  const exercises = await Exercise.find({ user: req.user.id });
-  res.status(200).json(exercises);
+  try {
+    const exercises = await Exercise.find({});
+    res.status(StatusCodes.OK).json(exercises);
+  } catch (error) {
+    logger.error(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    throw new Error("Error getting exercises");
+  }
 });
 
 // @desc  Add exercise
@@ -15,15 +23,23 @@ const getExercises = asyncHandler(async (req, res) => {
 // @access Private
 const addExercise = asyncHandler(async (req, res) => {
   if (!req.body.name) {
-    res.status(400);
-    throw new Error("Please add a name field");
+    res.status(StatusCodes.BAD_REQUEST);
+    throw new Error("No name field in request");
   }
 
-  const exercise = await Exercise.create({
-    name: req.body.name,
-    user: req.user.id,
-  });
-  res.status(200).json(exercise);
+  try {
+    const exercise = await Exercise.create({
+      name: req.body.name,
+      description: req.body.description,
+      user: req.user.id,
+      muscles: req.user.muscles,
+    });
+    res.status(StatusCodes.OK).json(exercise);
+  } catch (error) {
+    logger.error(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    throw new Error("Error adding exercise");
+  }
 });
 
 // @desc  Update exercise
@@ -33,28 +49,33 @@ const updateExercise = asyncHandler(async (req, res) => {
   const exercise = await Exercise.findById(req.params.id);
 
   if (!exercise) {
-    res.status(400);
+    res.status(StatusCodes.BAD_REQUEST);
     throw new Error("Exercise not found");
   }
 
   // Check for user
   if (!req.user) {
-    res.status(401);
+    res.status(StatusCodes.UNAUTHORIZED);
     throw new Error("User not found");
   }
 
-  // Make sure the logged in user matches the exercise user
-  if (exercise.user.toString() !== req.user.id) {
-    res.status(401);
-    throw new Error("User not authorized");
-  }
+  // // Make sure the logged in user matches the exercise user
+  // if (exercise.user.toString() !== req.user.id) {
+  //   res.status(StatusCodes.UNAUTHORIZED);
+  //   throw new Error("User not authorized");
+  // }
 
   const updatedExercise = await Exercise.findByIdAndUpdate(
     req.params.id,
     req.body,
     { new: true }
   );
-  res.status(200).json(updatedExercise);
+
+  if (!updatedExercise) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    throw new Error("Failed to update exercise");
+  }
+  res.status(StatusCodes.OK).json(updatedExercise);
 });
 
 // @desc  Delete exercise
@@ -64,24 +85,29 @@ const deleteExercise = asyncHandler(async (req, res) => {
   const exercise = await Exercise.findById(req.params.id);
 
   if (!exercise) {
-    res.status(400);
+    res.status(StatusCodes.BAD_REQUEST);
     throw new Error("Exercise not found");
   }
 
   // Check for user
   if (!req.user) {
-    res.status(401);
+    res.status(StatusCodes.UNAUTHORIZED);
     throw new Error("User not found");
   }
 
-  // Make sure the logged in user matches the exercise user
-  if (exercise.user.toString() !== req.user.id) {
-    res.status(401);
-    throw new Error("User not authorized");
-  }
-  await exercise.deleteOne();
+  // // Make sure the logged in user matches the exercise user
+  // if (exercise.user.toString() !== req.user.id) {
+  //   res.status(StatusCodes.UNAUTHORIZED);
+  //   throw new Error("User not authorized");
+  // }
+  const deleteCount = await exercise.deleteOne();
 
-  res.status(200).json({ id: req.params.id });
+  if (!deleteCount) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    throw new Error("Failed to delete exercise");
+  }
+
+  res.status(StatusCodes.OK).json({ id: req.params.id });
 });
 
 module.exports = {
