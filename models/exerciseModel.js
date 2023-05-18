@@ -11,6 +11,16 @@ const exerciseSchema = mongoose.Schema(
       type: String,
       required: [true, "Please add a name value"],
     },
+    description: {
+      type: String,
+      default: "",
+    },
+    muscles: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Muscle",
+      },
+    ],
   },
   {
     timestamps: true,

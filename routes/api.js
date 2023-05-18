@@ -12,6 +12,12 @@ const {
   loginUser,
   getMe,
 } = require("../controllers/userController");
+const {
+  getMuscles,
+  addMuscle,
+  updateMuscle,
+  deleteMuscle,
+} = require("../controllers/muscleController");
 
 // Exercises
 router
@@ -27,5 +33,12 @@ router
 router.post("/users", registerUser);
 router.post("/users/login", loginUser);
 router.get("/users/me", protect, getMe);
+
+// Muscles
+router.route("/muscles").get(protect, getMuscles).post(protect, addMuscle);
+router
+  .route("/muscles/:id")
+  .put(protect, updateMuscle)
+  .delete(protect, deleteMuscle);
 
 module.exports = router;

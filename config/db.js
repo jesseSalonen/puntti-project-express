@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const logger = require("../logger");
 
 // init mongoDB connection
 const connectDB = async () => {
@@ -7,7 +8,7 @@ const connectDB = async () => {
 
     console.log(`MongoDB Connected: ${conn.connection.host}`.cyan.underline);
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     process.exit(1);
   }
 };
