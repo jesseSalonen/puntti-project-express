@@ -9,7 +9,7 @@ const { StatusCodes } = require("http-status-codes");
 // @access Private
 const getExercises = asyncHandler(async (req, res) => {
   try {
-    const exercises = await Exercise.find({});
+    const exercises = await Exercise.find({}).populate("muscles");
     res.status(StatusCodes.OK).json(exercises);
   } catch (error) {
     logger.error(error);
@@ -32,7 +32,7 @@ const addExercise = asyncHandler(async (req, res) => {
       name: req.body.name,
       description: req.body.description,
       user: req.user.id,
-      muscles: req.user.muscles,
+      muscles: req.body.exerciseMuscles,
     });
     res.status(StatusCodes.OK).json(exercise);
   } catch (error) {

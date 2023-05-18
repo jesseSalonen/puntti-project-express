@@ -12,7 +12,7 @@ const addMuscle = asyncHandler(async (req, res) => {
     res.status(StatusCodes.BAD_REQUEST);
     throw new Error("No name field in request");
   }
-  logger.debug(req.body);
+  
   try {
     const muscle = await Muscle.create({
       name: req.body.name,

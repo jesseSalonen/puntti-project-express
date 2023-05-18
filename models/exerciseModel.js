@@ -15,10 +15,12 @@ const exerciseSchema = mongoose.Schema(
       type: String,
       default: "",
     },
-    muscles: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "Muscle",
-    },
+    muscles: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Muscle",
+      },
+    ],
   },
   {
     timestamps: true,
