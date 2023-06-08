@@ -5,6 +5,13 @@ const bcrypt = require("bcryptjs");
 const { StatusCodes } = require("http-status-codes");
 const logger = require("../logger");
 
+const EMAIL_WHITELIST = [
+  "jesse3778@gmail.com",
+  "jesse.salonen@wakaru.fi",
+  "jesse.ilmari.salonen@gmail.com",
+  "matteus.salonen.2003@gmail.com",
+];
+
 // @desc  Register new user
 // @route POST /api/users
 // @access Public
@@ -22,6 +29,11 @@ const registerUser = asyncHandler(async (req, res) => {
   if (userExists) {
     res.status(StatusCodes.BAD_REQUEST);
     throw new Error("User already exists");
+  }
+
+  if (!EMAIL_WHITELIST.includes(email)) {
+    res.status(StatusCodes.UNAUTHORIZED);
+    throw new Error("User email not whitelisted");
   }
 
   // Hash password
@@ -93,4 +105,5 @@ module.exports = {
   registerUser,
   loginUser,
   getMe,
+  EMAIL_WHITELIST,
 };
