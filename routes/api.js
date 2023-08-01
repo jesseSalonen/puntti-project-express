@@ -18,6 +18,13 @@ const {
   updateMuscle,
   deleteMuscle,
 } = require("../controllers/muscleController");
+const {
+  getWorkouts,
+  addWorkout,
+  updateWorkout,
+  deleteWorkout,
+} = require("../controllers/workoutController");
+const { getPrograms, addProgram } = require("../controllers/programController");
 
 // Exercises
 router
@@ -28,6 +35,17 @@ router
   .route("/exercises/:id")
   .put(protect, updateExercise)
   .delete(protect, deleteExercise);
+
+// Workouts
+router.route("/workouts").get(protect, getWorkouts).post(protect, addWorkout);
+router
+  .route("/workouts/:id")
+  .put(protect, updateWorkout)
+  .delete(protect, deleteWorkout);
+
+// Programs
+router.route("/programs").get(protect, getPrograms).post(protect, addProgram);
+router.route;
 
 // Users
 router.post("/users", registerUser);
