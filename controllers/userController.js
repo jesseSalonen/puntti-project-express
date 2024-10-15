@@ -10,6 +10,7 @@ const EMAIL_WHITELIST = [
   "jesse.salonen@wakaru.fi",
   "jesse.ilmari.salonen@gmail.com",
   "matteus.salonen.2003@gmail.com",
+  "iita.s1998@gmail.com"
 ];
 
 // @desc  Register new user
