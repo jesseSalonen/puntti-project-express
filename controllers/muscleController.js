@@ -14,6 +14,12 @@ const addMuscle = asyncHandler(async (req, res) => {
   }
   
   try {
+    // Check if a muscle with the same name already exists
+    const existingMuscle = await Muscle.findOne({ name: req.body.name });
+    if (existingMuscle) {
+      res.status(StatusCodes.BAD_REQUEST);
+      throw new Error("Muscle with this name already exists");
+    }
     const muscle = await Muscle.create({
       name: req.body.name,
       upper: req.body.upper ?? false,
@@ -24,8 +30,12 @@ const addMuscle = asyncHandler(async (req, res) => {
     res.status(StatusCodes.OK).json(muscle);
   } catch (error) {
     logger.error(error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
-    throw new Error("Error adding muscle");
+    if (error.message === "Muscle with this name already exists") {
+      throw error;
+    } else {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+      throw new Error("Error adding muscle");
+    }
   }
 });
 
