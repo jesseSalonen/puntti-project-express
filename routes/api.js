@@ -6,6 +6,7 @@ const {
   addExercise,
   updateExercise,
   deleteExercise,
+  getExercise,
 } = require("../controllers/exerciseController");
 const {
   registerUser,
@@ -33,6 +34,7 @@ router
   .post(protect, addExercise);
 router
   .route("/exercises/:id")
+  .get(protect, getExercise)
   .put(protect, updateExercise)
   .delete(protect, deleteExercise);
 
