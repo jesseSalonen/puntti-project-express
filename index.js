@@ -16,6 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 // logging middleware
@@ -26,3 +27,4 @@ app.use("/api", require("./routes/api"));
 
 // error handler = send user the error res when error thrown
 app.use(errorHandler);
+
