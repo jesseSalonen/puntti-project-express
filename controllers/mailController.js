@@ -5,6 +5,7 @@ const axios = require("axios");
 
 getZohoAccessToken = asyncHandler(async () => {
     try {
+        console.log(process.env.ZOHO_MAIL_ACCOUNT);
         const response = await axios.post("https://accounts.zoho.eu/oauth/v2/token", null, {
             params: {
                 refresh_token: process.env.ZOHO_REFRESH_TOKEN,
