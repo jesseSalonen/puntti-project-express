@@ -26,6 +26,7 @@ const {
   deleteWorkout,
 } = require("../controllers/workoutController");
 const { getPrograms, addProgram } = require("../controllers/programController");
+const {sendEmail} = require('../controllers/mailController');
 
 // Exercises
 router
@@ -47,7 +48,6 @@ router
 
 // Programs
 router.route("/programs").get(protect, getPrograms).post(protect, addProgram);
-router.route;
 
 // Users
 router.post("/users", registerUser);
@@ -60,5 +60,8 @@ router
   .route("/muscles/:id")
   .put(protect, updateMuscle)
   .delete(protect, deleteMuscle);
+
+// Email
+router.post("/send-email", sendEmail);
 
 module.exports = router;
