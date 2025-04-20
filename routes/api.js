@@ -23,7 +23,7 @@ const {
   getWorkouts,
   addWorkout,
   updateWorkout,
-  deleteWorkout,
+  deleteWorkout, getWorkout,
 } = require("../controllers/workoutController");
 const { getPrograms, addProgram } = require("../controllers/programController");
 const {sendEmail} = require('../controllers/mailController');
@@ -43,6 +43,7 @@ router
 router.route("/workouts").get(protect, getWorkouts).post(protect, addWorkout);
 router
   .route("/workouts/:id")
+  .get(protect, getWorkout)
   .put(protect, updateWorkout)
   .delete(protect, deleteWorkout);
 

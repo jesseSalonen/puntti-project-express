@@ -22,6 +22,29 @@ const getWorkouts = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json(workouts);
 });
 
+// @desc  Get workout
+// @route GET /api/workouts/:id
+// @access Private
+const getWorkout = asyncHandler(async (req, res) => {
+  const workout = await Workout.findById(req.params.id)
+    .populate({
+      path: 'exercises.exercise',
+      model: 'Exercise',
+      populate: {
+        path: 'muscles',
+        model: 'Muscle'
+      }
+    })
+    .populate('user', 'name email');
+
+  if (!workout) {
+    res.status(StatusCodes.NOT_FOUND);
+    throw new Error("Workout not found");
+  }
+
+  res.status(StatusCodes.OK).json(workout);
+});
+
 // @desc  Add workout
 // @route POST /api/workouts
 // @access Private
@@ -144,6 +167,7 @@ const deleteWorkout = asyncHandler(async (req, res) => {
 
 module.exports = {
   getWorkouts,
+  getWorkout,
   addWorkout,
   updateWorkout,
   deleteWorkout,
