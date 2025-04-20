@@ -1,5 +1,21 @@
 const mongoose = require("mongoose");
 
+// Define set schema inline (no separate model needed)
+const setSchema = mongoose.Schema({
+  reps: {
+    type: Number,
+    default: null,
+  },
+  dropSet: {
+    type: Boolean,
+    default: false,
+  },
+  restPause: {
+    type: Boolean,
+    default: false,
+  },
+});
+
 const workoutSchema = mongoose.Schema(
   {
     user: {
@@ -17,30 +33,12 @@ const workoutSchema = mongoose.Schema(
     },
     exercises: [
       {
-        exercises: [
-          {
-            exercise: {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: "Exercise",
-            },
-            setAmount: {
-              type: Number,
-              required: true,
-            },
-            sets: [
-              {
-                type: mongoose.Schema.Types.ObjectId,
-                required: true,
-                ref: "Set",
-              },
-            ],
-          },
-        ],
-        description: {
-          type: String,
-          default: "",
+        exercise: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Exercise",
         },
-      },
+        sets: [setSchema], // Embed sets directly using the schema
+      }
     ],
   },
   {
