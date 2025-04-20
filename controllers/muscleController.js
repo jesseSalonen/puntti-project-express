@@ -13,44 +13,35 @@ const addMuscle = asyncHandler(async (req, res) => {
     throw new Error("No name field in request");
   }
   
-  try {
-    // Check if a muscle with the same name already exists
-    const existingMuscle = await Muscle.findOne({ name: req.body.name });
-    if (existingMuscle) {
-      res.status(StatusCodes.BAD_REQUEST);
-      throw new Error("Muscle with this name already exists");
-    }
-    const muscle = await Muscle.create({
-      name: req.body.name,
-      upper: req.body.upper ?? false,
-      lower: req.body.lower ?? false,
-      pushing: req.body.pushing ?? false,
-      pulling: req.body.pulling ?? false,
-    });
-    res.status(StatusCodes.OK).json(muscle);
-  } catch (error) {
-    logger.error(error);
-    if (error.message === "Muscle with this name already exists") {
-      throw error;
-    } else {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR);
-      throw new Error("Error adding muscle");
-    }
+  // Check if a muscle with the same name already exists
+  const existingMuscle = await Muscle.findOne({ name: req.body.name });
+  if (existingMuscle) {
+    res.status(StatusCodes.BAD_REQUEST);
+    throw new Error("Muscle with this name already exists");
   }
+  
+  const muscle = await Muscle.create({
+    name: req.body.name,
+    upper: req.body.upper ?? false,
+    lower: req.body.lower ?? false,
+    pushing: req.body.pushing ?? false,
+    pulling: req.body.pulling ?? false,
+  });
+  
+  if (!muscle) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    throw new Error("Failed to create muscle");
+  }
+  
+  res.status(StatusCodes.OK).json(muscle);
 });
 
 // @desc  Get muscles
 // @route GET /api/muscles
 // @access Private
 const getMuscles = asyncHandler(async (req, res) => {
-  try {
-    const muscles = await Muscle.find({});
-    res.status(StatusCodes.OK).json(muscles);
-  } catch (error) {
-    logger.error(error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
-    throw new Error("Error getting muscles");
-  }
+  const muscles = await Muscle.find({});
+  res.status(StatusCodes.OK).json(muscles);
 });
 
 // @desc  Update muscle
@@ -80,6 +71,7 @@ const updateMuscle = asyncHandler(async (req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR);
     throw new Error("Failed to update muscle");
   }
+  
   res.status(StatusCodes.OK).json(updatedMuscle);
 });
 

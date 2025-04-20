@@ -57,7 +57,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(StatusCodes.BAD_REQUEST);
-    throw new Error("Invalid  user data");
+    throw new Error("Invalid user data");
   }
 });
 
@@ -71,14 +71,14 @@ const loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email });
 
   if (user && (await bcrypt.compare(password, user.password))) {
-    res.status(201).json({
+    res.status(StatusCodes.CREATED).json({
       _id: user.id,
       name: user.name,
       email: user.email,
       token: generateToken(user._id),
     });
   } else {
-    res.status(400);
+    res.status(StatusCodes.BAD_REQUEST);
     throw new Error("Invalid credentials");
   }
 });
@@ -88,7 +88,7 @@ const loginUser = asyncHandler(async (req, res) => {
 // @access Private
 const getMe = asyncHandler(async (req, res) => {
   const { _id, name, email } = req.user;
-  res.status(200).json({
+  res.status(StatusCodes.OK).json({
     id: _id,
     name,
     email,

@@ -8,14 +8,8 @@ const { StatusCodes } = require("http-status-codes");
 // @route GET /api/programs
 // @access Private
 const getPrograms = asyncHandler(async (req, res) => {
-  try {
-    const programs = await Program.find({}).populate("workouts");
-    res.status(StatusCodes.OK).json(programs);
-  } catch (error) {
-    logger.error(error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
-    throw new Error("Error getting programs");
-  }
+  const programs = await Program.find({}).populate("workouts");
+  res.status(StatusCodes.OK).json(programs);
 });
 
 // @desc  Add program
@@ -27,19 +21,19 @@ const addProgram = asyncHandler(async (req, res) => {
     throw new Error("No name field in request");
   }
 
-  try {
-    const program = await Program.create({
-      name: req.body.name,
-      description: req.body.description,
-      user: req.user.id,
-      workouts: req.body.programWorkouts,
-    });
-    res.status(StatusCodes.OK).json(program);
-  } catch (error) {
-    logger.error(error);
+  const program = await Program.create({
+    name: req.body.name,
+    description: req.body.description,
+    user: req.user.id,
+    workouts: req.body.programWorkouts,
+  });
+  
+  if (!program) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR);
-    throw new Error("Error adding program");
+    throw new Error("Failed to create program");
   }
+  
+  res.status(StatusCodes.OK).json(program);
 });
 
 // @desc  Update program
@@ -59,12 +53,6 @@ const updateProgram = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-  // // Make sure the logged in user matches the exercise user
-  // if (exercise.user.toString() !== req.user.id) {
-  //   res.status(StatusCodes.UNAUTHORIZED);
-  //   throw new Error("User not authorized");
-  // }
-
   const updatedProgram = await Program.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -75,6 +63,7 @@ const updateProgram = asyncHandler(async (req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR);
     throw new Error("Failed to update program");
   }
+  
   res.status(StatusCodes.OK).json(updatedProgram);
 });
 
@@ -95,11 +84,6 @@ const deleteProgram = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-  // // Make sure the logged in user matches the exercise user
-  // if (exercise.user.toString() !== req.user.id) {
-  //   res.status(StatusCodes.UNAUTHORIZED);
-  //   throw new Error("User not authorized");
-  // }
   const deleteCount = await program.deleteOne();
 
   if (!deleteCount) {
