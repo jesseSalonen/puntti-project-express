@@ -25,7 +25,7 @@ const {
   updateWorkout,
   deleteWorkout, getWorkout,
 } = require("../controllers/workoutController");
-const { getPrograms, addProgram } = require("../controllers/programController");
+const { getPrograms, addProgram, updateProgram, deleteProgram, getProgram} = require("../controllers/programController");
 const {sendEmail} = require('../controllers/mailController');
 
 // Exercises
@@ -49,6 +49,11 @@ router
 
 // Programs
 router.route("/programs").get(protect, getPrograms).post(protect, addProgram);
+router
+  .route("/programs/:id")
+  .get(protect, getProgram)
+  .put(protect, updateProgram)
+  .delete(protect, deleteProgram);
 
 // Users
 router.post("/users", registerUser);
