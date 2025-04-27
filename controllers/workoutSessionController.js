@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const WorkoutSession = require("../models/workoutSessionModel");
 const User = require("../models/userModel");
+const Workout = require("../models/workoutModel");
 const logger = require("../logger");
 const { StatusCodes } = require("http-status-codes");
 const { Types } = require('mongoose');
@@ -67,14 +68,36 @@ const addWorkoutSession = asyncHandler(async (req, res) => {
     throw new Error("Please provide a workout ID");
   }
 
+  // First, find the workout to get its exercises
+  const workout = await Workout.findById(workoutId).populate('exercises.exercise');
+
+  if (!workout) {
+    res.status(StatusCodes.BAD_REQUEST);
+    throw new Error("Workout not found");
+  }
+
+  // Transform workout exercises to exercisePerformances
+  const exercisePerformances = workout.exercises.map(workoutExercise => {
+    return {
+      exercise: workoutExercise.exercise._id,
+      sets: workoutExercise.sets.map(set => ({
+        weight: 0,
+        reps: set.reps || 0,
+        dropSet: set.dropSet || false,
+        restPause: set.restPause || false,
+        completed: false,
+        notes: ""
+      }))
+    };
+  });
+
   // Create the workout session
   const workoutSession = await WorkoutSession.create({
     user: req.user.id,
     workout: workoutId,
     program: programId || null,
     programDay: programDay ?? null,
-    // Initialize with empty arrays/strings since they aren't in the request
-    exercisePerformances: [],
+    exercisePerformances: exercisePerformances,
     notes: "",
     status: "in-progress"
   });
