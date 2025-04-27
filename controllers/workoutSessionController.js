@@ -56,27 +56,26 @@ const getWorkoutSession = asyncHandler(async (req, res) => {
 // @route POST /api/workout-sessions
 // @access Private
 const addWorkoutSession = asyncHandler(async (req, res) => {
-  const { 
-    workout, 
-    program, 
-    programDay, 
-    exercisePerformances, 
-    notes 
+  const {
+    workoutId,
+    programId,
+    programDay
   } = req.body;
 
-  if (!workout) {
+  if (!workoutId) {
     res.status(StatusCodes.BAD_REQUEST);
-    throw new Error("Please provide a workout");
+    throw new Error("Please provide a workout ID");
   }
 
   // Create the workout session
   const workoutSession = await WorkoutSession.create({
     user: req.user.id,
-    workout,
-    program: program || null,
-    programDay: programDay || null,
-    exercisePerformances: exercisePerformances || [],
-    notes: notes || "",
+    workout: workoutId,
+    program: programId || null,
+    programDay: programDay ?? null,
+    // Initialize with empty arrays/strings since they aren't in the request
+    exercisePerformances: [],
+    notes: "",
     status: "in-progress"
   });
 
