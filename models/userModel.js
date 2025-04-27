@@ -20,10 +20,6 @@ const userSchema = mongoose.Schema(
         program: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Program",
-        },
-        isActive: {
-          type: Boolean,
-          default: false,
         }
       }
     ]

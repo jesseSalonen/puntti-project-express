@@ -65,10 +65,6 @@ const workoutSessionSchema = mongoose.Schema(
       type: String,
       default: ""
     },
-    duration: {
-      type: Number, // Store duration in minutes
-      default: 0
-    },
     completedAt: {
       type: Date,
       default: null

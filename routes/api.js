@@ -27,6 +27,14 @@ const {
 } = require("../controllers/workoutController");
 const { getPrograms, addProgram, updateProgram, deleteProgram, getProgram} = require("../controllers/programController");
 const {sendEmail} = require('../controllers/mailController');
+const {
+  getWorkoutSessions,
+  getWorkoutSession,
+  getUserRecentWorkoutSessions,
+  addWorkoutSession,
+  updateWorkoutSession,
+  deleteWorkoutSession,
+} = require("../controllers/workoutSessionController");
 
 // Exercises
 router
@@ -54,6 +62,18 @@ router
   .get(protect, getProgram)
   .put(protect, updateProgram)
   .delete(protect, deleteProgram);
+
+// Workout Sessions
+router
+  .route("/workout-sessions")
+  .get(protect, getWorkoutSessions)
+  .post(protect, addWorkoutSession);
+router.route("/workout-sessions/recent").get(protect, getUserRecentWorkoutSessions);
+router
+  .route("/workout-sessions/:id")
+  .get(protect, getWorkoutSession)
+  .put(protect, updateWorkoutSession)
+  .delete(protect, deleteWorkoutSession);
 
 // Users
 router.post("/users", registerUser);
