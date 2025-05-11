@@ -24,10 +24,6 @@ const exercisePerformanceSchema = mongoose.Schema({
       type: Boolean,
       default: false
     },
-    completed: {
-      type: Boolean,
-      default: false
-    },
     notes: {
       type: String,
       default: ""
