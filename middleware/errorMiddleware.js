@@ -5,7 +5,7 @@ const errorHandler = (err, req, res, next) => {
 
   res.status(statusCode);
 
-  logger.error(err.message);
+  logger.error(err.message, { trace: err.stack });
 
   res.json({
     message: err.message,

@@ -1,8 +1,10 @@
 const asyncHandler = require("express-async-handler");
 const Workout = require("../models/workoutModel");
+const WorkoutSession = require("../models/workoutSessionModel");
 const User = require("../models/userModel");
 const logger = require("../logger");
 const { StatusCodes } = require("http-status-codes");
+const {Types} = require('mongoose');
 
 // @desc  Get workouts
 // @route GET /api/workouts

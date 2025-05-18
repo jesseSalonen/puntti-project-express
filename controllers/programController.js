@@ -3,6 +3,8 @@ const Program = require("../models/programModel");
 const User = require("../models/userModel");
 const logger = require("../logger");
 const { StatusCodes } = require("http-status-codes");
+const WorkoutSession = require("../models/workoutSessionModel");
+const {Types} = require('mongoose');
 
 // Deep populate configuration for workouts and their nested data
 const workoutPopulateConfig = {

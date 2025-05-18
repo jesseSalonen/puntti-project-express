@@ -15,6 +15,14 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, "Please add a password"],
     },
+    subscribedPrograms: [
+      {
+        program: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Program",
+        }
+      }
+    ]
   },
   {
     timestamps: true,
