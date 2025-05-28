@@ -24,7 +24,7 @@ const getWorkoutSessions = asyncHandler(async (req, res) => {
     .populate(exercisePerformancePopulateConfig)
     .populate('workout')
     .populate('program')
-    .populate('user', 'name email');
+    .populate('user', 'subscribedPrograms');
 
   res.status(StatusCodes.OK).json(workoutSessions);
 });
@@ -209,121 +209,11 @@ const deleteWorkoutSession = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ id: req.params.id });
 });
 
-// @desc  Get user's recent program and standalone workout sessions
-// @route GET /api/workout-sessions/user/recent
-// @access Private
-const getUserRecentWorkoutSessions = asyncHandler(async (req, res) => {
-  // Convert user ID string to mongoose ObjectId
-  const userId = new Types.ObjectId(req.user.id);
-  
-  // Find the user with their subscribed programs
-  const user = await User.findById(req.user.id)
-    .populate('subscribedPrograms.program');
-  
-  if (!user) {
-    res.status(StatusCodes.NOT_FOUND);
-    throw new Error("User not found");
-  }
-  
-  // Get all subscribed program IDs
-  const subscribedProgramIds = user.subscribedPrograms.map(sub => sub.program._id);
-  
-  // 1. Find the program sessions
-  const programSessionsAggregation = await WorkoutSession.aggregate([
-    {
-      $match: {
-        user: userId,
-        program: { $in: subscribedProgramIds }
-      }
-    },
-    {
-      $sort: { createdAt: -1 }
-    },
-    {
-      $group: {
-        _id: "$program",
-        sessionId: { $first: "$_id" },
-      }
-    }
-  ]);
-  
-  // 2. Find the standalone workout sessions (without program link)
-  const standaloneSessionsAggregation = await WorkoutSession.aggregate([
-    {
-      $match: {
-        user: userId,
-        program: null
-      }
-    },
-    {
-      $sort: { createdAt: -1 }
-    },
-    {
-      $group: {
-        _id: "$workout",
-        sessionId: { $first: "$_id" },
-      }
-    },
-    {
-      $limit: 2 // Get only the two most recent standalone workouts
-    }
-  ]);
-  
-  // Extract the session IDs from each type
-  const programSessionIds = programSessionsAggregation.map(session => 
-    new Types.ObjectId(session.sessionId)
-  );
-  
-  const standaloneSessionIds = standaloneSessionsAggregation.map(session => 
-    new Types.ObjectId(session.sessionId)
-  );
-  
-  // Fetch complete program session documents with population
-  const programSessions = await WorkoutSession.find({
-    _id: { $in: programSessionIds }
-  })
-  .populate('workout')
-  .populate({
-    path: 'workout',
-    populate: {
-      path: 'exercises.exercise',
-      populate: {
-        path: 'muscles'
-      }
-    }
-  })
-  .populate('program')
-  .sort({ createdAt: -1 });
-  
-  // Fetch complete standalone session documents with population
-  const standaloneSessions = await WorkoutSession.find({
-    _id: { $in: standaloneSessionIds }
-  })
-  .populate('workout')
-  .populate({
-    path: 'workout',
-    populate: {
-      path: 'exercises.exercise',
-      populate: {
-        path: 'muscles'
-      }
-    }
-  })
-  .sort({ createdAt: -1 });
-  
-  // Return both types of sessions in separate arrays
-  res.status(StatusCodes.OK).json({
-    programSessions,
-    standaloneSessions
-  });
-});
-
 module.exports = {
   getWorkoutSessions,
   getWorkoutSession,
   addWorkoutSession,
   updateWorkoutSession,
   deleteWorkoutSession,
-  getUserRecentWorkoutSessions,
 };
 
