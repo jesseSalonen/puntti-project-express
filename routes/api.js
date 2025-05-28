@@ -30,7 +30,6 @@ const {sendEmail} = require('../controllers/mailController');
 const {
   getWorkoutSessions,
   getWorkoutSession,
-  getUserRecentWorkoutSessions,
   addWorkoutSession,
   updateWorkoutSession,
   deleteWorkoutSession,
@@ -68,7 +67,6 @@ router
   .route("/workout-sessions")
   .get(protect, getWorkoutSessions)
   .post(protect, addWorkoutSession);
-router.route("/workout-sessions/recent").get(protect, getUserRecentWorkoutSessions);
 router
   .route("/workout-sessions/:id")
   .get(protect, getWorkoutSession)
