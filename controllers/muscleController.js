@@ -40,7 +40,7 @@ const addMuscle = asyncHandler(async (req, res) => {
 // @route GET /api/muscles
 // @access Private
 const getMuscles = asyncHandler(async (req, res) => {
-  const muscles = await Muscle.find({});
+  const muscles = await Muscle.find({}).sort({ name: 1 });
   res.status(StatusCodes.OK).json(muscles);
 });
 
