@@ -41,16 +41,67 @@ const getWorkoutSession = asyncHandler(async (req, res) => {
 
   if (!workoutSession) {
     res.status(StatusCodes.NOT_FOUND);
-    throw new Error("Workout session not found");
+    throw new Error('Workout session not found');
   }
 
   // Check if the session belongs to the user
   if (workoutSession.user._id.toString() !== req.user.id) {
     res.status(StatusCodes.UNAUTHORIZED);
-    throw new Error("Not authorized to access this workout session");
+    throw new Error('Not authorized to access this workout session');
   }
 
-  res.status(StatusCodes.OK).json(workoutSession);
+  // For each exercise performance, find the latest completed session with this exercise
+  const enhancedExercisePerformances = await Promise.all(
+    workoutSession.exercisePerformances.map(async (performance) => {
+      const exerciseId = performance.exercise._id;
+
+      // Find the latest completed workout session that contains this exercise
+      // Excluding the current session
+      const latestSession = await WorkoutSession.findOne({
+        user: req.user.id,
+        status: 'completed',
+        _id: {$ne: workoutSession._id},
+        'exercisePerformances': {
+          $elemMatch: {
+            'exercise': exerciseId,
+            'sets': {
+              $elemMatch: {
+                'weight': {$gt: 0},
+                'reps': {$gt: 0}
+              }
+            }
+          }
+        }
+      }).sort({completedAt: -1});
+
+      // Convert to a plain object to allow adding new properties
+      const performanceObj = performance.toObject();
+
+      if (latestSession) {
+        // Find the exercise performance in the latest session
+        const latestPerformance = latestSession.exercisePerformances.find(
+          p => p.exercise.toString() === exerciseId.toString()
+        );
+
+        if (latestPerformance && latestPerformance.sets.length > 0) {
+          // Add the historical data to the performance
+          performanceObj.lastPerformance = {
+            date: latestSession.completedAt,
+            sessionId: latestSession._id,
+            sets: latestPerformance.sets
+          };
+        }
+      }
+
+      return performanceObj;
+    })
+  );
+
+  // Create a response object with the enhanced exercise performances
+  const responseData = workoutSession.toObject();
+  responseData.exercisePerformances = enhancedExercisePerformances;
+
+  res.status(StatusCodes.OK).json(responseData);
 });
 
 // @desc  Add workout session
@@ -166,14 +217,66 @@ const updateWorkoutSession = asyncHandler(async (req, res) => {
   )
     .populate(exercisePerformancePopulateConfig)
     .populate('workout')
-    .populate('program');
+    .populate('program')
+    .populate('user', 'name email');
 
   if (!updatedWorkoutSession) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR);
     throw new Error("Error updating workout session");
   }
 
-  res.status(StatusCodes.OK).json(updatedWorkoutSession);
+  // For each exercise performance, find the latest completed session with this exercise
+  const enhancedExercisePerformances = await Promise.all(
+    updatedWorkoutSession.exercisePerformances.map(async (performance) => {
+      const exerciseId = performance.exercise._id;
+
+      // Find the latest completed workout session that contains this exercise
+      // Excluding the current session
+      const latestSession = await WorkoutSession.findOne({
+        user: req.user.id,
+        status: 'completed',
+        _id: {$ne: updatedWorkoutSession._id},
+        'exercisePerformances': {
+          $elemMatch: {
+            'exercise': exerciseId,
+            'sets': {
+              $elemMatch: {
+                'weight': {$gt: 0},
+                'reps': {$gt: 0}
+              }
+            }
+          }
+        }
+      }).sort({completedAt: -1});
+
+      // Convert to a plain object to allow adding new properties
+      const performanceObj = performance.toObject();
+
+      if (latestSession) {
+        // Find the exercise performance in the latest session
+        const latestPerformance = latestSession.exercisePerformances.find(
+          p => p.exercise.toString() === exerciseId.toString()
+        );
+
+        if (latestPerformance && latestPerformance.sets.length > 0) {
+          // Add the historical data to the performance
+          performanceObj.lastPerformance = {
+            date: latestSession.completedAt,
+            sessionId: latestSession._id,
+            sets: latestPerformance.sets
+          };
+        }
+      }
+
+      return performanceObj;
+    })
+  );
+
+  // Create a response object with the enhanced exercise performances
+  const responseData = updatedWorkoutSession.toObject();
+  responseData.exercisePerformances = enhancedExercisePerformances;
+
+  res.status(StatusCodes.OK).json(responseData);
 });
 
 // @desc  Delete workout session
